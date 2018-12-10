@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 27
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
@@ -11,10 +11,10 @@ android {
 }
 
 dependencies {
-    compile 'com.google.code.gson:gson:2.8.0'
-    compile "com.squareup.okhttp3:okhttp:$okhttp3Version"
-    compile 'nl.qbusict:cupboard:2.2.0'
-    compile "com.android.support:design:$supportLibVersion"
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    implementation 'nl.qbusict:cupboard:2.2.0'
+    implementation "com.android.support:design:$supportVersion"
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

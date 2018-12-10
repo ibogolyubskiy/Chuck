@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 27
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
@@ -13,10 +13,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -25,11 +21,13 @@ android {
 }
 
 dependencies {
-    debugCompile project(':library')
-    releaseCompile project(':library-no-op')
-    compile "com.android.support:design:26.0.0"
-    compile "com.android.support:appcompat-v7:26.0.0"
-    compile "com.squareup.okhttp3:logging-interceptor:$okhttp3Version"
-    compile "com.squareup.retrofit2:retrofit:2.2.0"
-    compile "com.squareup.retrofit2:converter-gson:2.2.0"
+    debugImplementation project(':library')
+    releaseImplementation project(':library-no-op')
+    implementation "com.android.support:design:$supportVersion"
+    implementation "com.android.support:appcompat-v7:$supportVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation 'com.google.code.gson:gson:2.8.5'
+
 }
