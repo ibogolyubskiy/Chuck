@@ -41,14 +41,18 @@ import javax.xml.transform.stream.StreamResult;
 public class FormatUtils {
 
     public static String formatHeaders(List<HttpHeader> httpHeaders, boolean withMarkup) {
-        String out = "";
+        StringBuilder out = new StringBuilder();
         if (httpHeaders != null) {
             for (HttpHeader header : httpHeaders) {
-                out += ((withMarkup) ? "<b>" : "") + header.getName() + ": " + ((withMarkup) ? "</b>" : "") +
-                        header.getValue() + ((withMarkup) ? "<br />" : "\n");
+                out.append((withMarkup) ? "<b>" : "")
+                   .append(header.getName())
+                   .append(": ")
+                   .append((withMarkup) ? "</b>" : "")
+                   .append(header.getValue())
+                   .append((withMarkup) ? "<br />" : "\n");
             }
         }
-        return out;
+        return out.toString();
     }
 
     public static String formatByteCount(long bytes, boolean si) {
@@ -120,8 +124,8 @@ public class FormatUtils {
 
     public static String getShareCurlCommand(HttpTransaction transaction) {
         boolean compressed = false;
-        String curlCmd = "curl";
-        curlCmd += " -X " + transaction.getMethod();
+        StringBuilder curlCmd = new StringBuilder("curl");
+        curlCmd.append(" -X ").append(transaction.getMethod());
         List<HttpHeader> headers = transaction.getRequestHeaders();
         for (int i = 0, count = headers.size(); i < count; i++) {
             String name = headers.get(i).getName();
@@ -129,15 +133,21 @@ public class FormatUtils {
             if ("Accept-Encoding".equalsIgnoreCase(name) && "gzip".equalsIgnoreCase(value)) {
                 compressed = true;
             }
-            curlCmd += " -H " + "\"" + name + ": " + value + "\"";
+            curlCmd.append(" -H " + "\"")
+                   .append(name)
+                   .append(": ")
+                   .append(value)
+                   .append("\"");
         }
         String requestBody = transaction.getRequestBody();
         if (requestBody != null && requestBody.length() > 0) {
             // try to keep to a single line and use a subshell to preserve any line breaks
-            curlCmd += " --data $'" + requestBody.replace("\n", "\\n") + "'";
+            curlCmd.append(" --data $'")
+                   .append(requestBody.replace("\n", "\\n"))
+                   .append("'");
         }
-        curlCmd += ((compressed) ? " --compressed " : " ") + transaction.getUrl();
-        return curlCmd;
+        curlCmd.append((compressed) ? " --compressed " : " ").append(transaction.getUrl());
+        return curlCmd.toString();
     }
 
     private static String v(String string) {
