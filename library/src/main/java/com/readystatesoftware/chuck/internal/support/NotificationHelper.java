@@ -80,7 +80,7 @@ public class NotificationHelper {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                     .setContentIntent(PendingIntent.getActivity(context, 0, Chuck.getLaunchIntent(context), 0))
                     .setLocalOnly(true)
-                    .setSmallIcon(R.drawable.chuck_ic_notification_white_24dp)
+                    .setSmallIcon(R.drawable.chuck_ic_notification_white_36dp)
                     .setColor(ContextCompat.getColor(context, R.color.chuck_colorPrimary))
                     .setContentTitle(context.getString(R.string.chuck_notification_title));
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
