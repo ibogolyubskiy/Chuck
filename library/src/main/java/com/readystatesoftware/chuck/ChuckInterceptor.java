@@ -18,6 +18,7 @@ package com.readystatesoftware.chuck;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
@@ -33,6 +34,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import nl.qbusict.cupboard.Cupboard;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
@@ -80,6 +82,8 @@ public final class ChuckInterceptor implements Interceptor {
     private boolean showNotification;
     private long maxContentLength = 250000L;
 
+    private Cupboard cupboard = LocalCupboard.getInstance();
+
     /**
      * @param context The current Context.
      */
@@ -125,7 +129,9 @@ public final class ChuckInterceptor implements Interceptor {
         return this;
     }
 
-    @Override public Response intercept(Chain chain) throws IOException {
+    @NonNull
+    @Override
+    public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
 
         RequestBody requestBody = request.body();
@@ -147,7 +153,7 @@ public final class ChuckInterceptor implements Interceptor {
             }
         }
 
-        transaction.setRequestBodyIsPlainText(!bodyHasUnsupportedEncoding(request.headers()));
+        transaction.setRequestBodyIsPlainText(bodyHasSupportedEncoding(request.headers()));
         if (hasRequestBody && transaction.requestBodyIsPlainText()) {
             BufferedSource source = getNativeSource(new Buffer(), bodyGzipped(request.headers()));
             Buffer buffer = source.buffer();
@@ -192,7 +198,7 @@ public final class ChuckInterceptor implements Interceptor {
         }
         transaction.setResponseHeaders(response.headers());
 
-        transaction.setResponseBodyIsPlainText(!bodyHasUnsupportedEncoding(response.headers()));
+        transaction.setResponseBodyIsPlainText(bodyHasSupportedEncoding(response.headers()));
         if (HttpHeaders.hasBody(response) && transaction.responseBodyIsPlainText()) {
             BufferedSource source = getNativeSource(response);
             source.request(Long.MAX_VALUE);
@@ -221,9 +227,9 @@ public final class ChuckInterceptor implements Interceptor {
     }
 
     private Uri create(HttpTransaction transaction) {
-        ContentValues values = LocalCupboard.getInstance().withEntity(HttpTransaction.class).toContentValues(transaction);
+        ContentValues values = cupboard.withEntity(HttpTransaction.class).toContentValues(transaction);
         Uri uri = context.getContentResolver().insert(ChuckContentProvider.TRANSACTION_URI, values);
-        transaction.setId(Long.valueOf(uri.getLastPathSegment()));
+        transaction.setId(Long.valueOf(uri != null ? uri.getLastPathSegment() : null));
         if (showNotification) {
             notificationHelper.show(transaction);
         }
@@ -231,13 +237,12 @@ public final class ChuckInterceptor implements Interceptor {
         return uri;
     }
 
-    private int update(HttpTransaction transaction, Uri uri) {
-        ContentValues values = LocalCupboard.getInstance().withEntity(HttpTransaction.class).toContentValues(transaction);
+    private void update(HttpTransaction transaction, Uri uri) {
+        ContentValues values = cupboard.withEntity(HttpTransaction.class).toContentValues(transaction);
         int updated = context.getContentResolver().update(uri, values, null, null);
         if (showNotification && updated > 0) {
             notificationHelper.show(transaction);
         }
-        return updated;
     }
 
     /**
@@ -264,11 +269,9 @@ public final class ChuckInterceptor implements Interceptor {
         }
     }
 
-    private boolean bodyHasUnsupportedEncoding(Headers headers) {
+    private boolean bodyHasSupportedEncoding(Headers headers) {
         String contentEncoding = headers.get("Content-Encoding");
-        return contentEncoding != null &&
-                !contentEncoding.equalsIgnoreCase("identity") &&
-                !contentEncoding.equalsIgnoreCase("gzip");
+        return "identity".equalsIgnoreCase(contentEncoding) || "gzip".equalsIgnoreCase(contentEncoding);
     }
 
     private boolean bodyGzipped(Headers headers) {

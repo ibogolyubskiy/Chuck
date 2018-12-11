@@ -32,7 +32,11 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:navigationIcon="@drawable/chuck_ic_notification_white_36dp"
+            app:title="@string/chuck_name"
+            app:subtitle="@string/chuck_name"
+            app:contentInsetStartWithNavigation="0dp"
+            app:subtitleTextAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle"
+            app:navigationIcon="@drawable/chuck_ic_notification_white_24dp"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     </android.support.design.widget.AppBarLayout>

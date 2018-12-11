@@ -16,6 +16,7 @@
 package com.readystatesoftware.chuck.internal.ui;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Html;
@@ -60,11 +61,10 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle state) {
         View view = inflater.inflate(R.layout.chuck_fragment_transaction_payload, container, false);
-        headers = (TextView) view.findViewById(R.id.headers);
-        body = (TextView) view.findViewById(R.id.body);
+        headers = view.findViewById(R.id.headers);
+        body = view.findViewById(R.id.body);
         return view;
     }
 

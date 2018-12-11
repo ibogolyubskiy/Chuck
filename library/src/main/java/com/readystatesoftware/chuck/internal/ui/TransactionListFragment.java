@@ -18,6 +18,7 @@ package com.readystatesoftware.chuck.internal.ui;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -41,11 +42,13 @@ import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 import com.readystatesoftware.chuck.internal.support.SQLiteUtils;
 
+import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
+
 public class TransactionListFragment extends Fragment implements
         SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private String currentFilter;
-    private OnListFragmentInteractionListener listener;
+    private OnItemSelectionListener listener;
     private TransactionAdapter adapter;
 
     public TransactionListFragment() {}
@@ -61,15 +64,14 @@ public class TransactionListFragment extends Fragment implements
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chuck_fragment_transaction_list, container, false);
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),
-                    DividerItemDecoration.VERTICAL));
+            DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
+            recyclerView.addItemDecoration(decoration);
             adapter = new TransactionAdapter(getContext(), listener);
             recyclerView.setAdapter(adapter);
         }
@@ -85,11 +87,11 @@ public class TransactionListFragment extends Fragment implements
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            listener = (OnListFragmentInteractionListener) context;
+        if (context instanceof OnItemSelectionListener) {
+            listener = (OnItemSelectionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
+                    + " must implement OnItemSelectionListener");
         }
     }
 
@@ -123,6 +125,7 @@ public class TransactionListFragment extends Fragment implements
         }
     }
 
+    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader loader = new CursorLoader(getContext());
@@ -142,12 +145,12 @@ public class TransactionListFragment extends Fragment implements
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
         adapter.swapCursor(data);
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
         adapter.swapCursor(null);
     }
 
@@ -163,7 +166,7 @@ public class TransactionListFragment extends Fragment implements
         return true;
     }
 
-    public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(HttpTransaction item);
+    public interface OnItemSelectionListener {
+        void onSelectItem(HttpTransaction item);
     }
 }

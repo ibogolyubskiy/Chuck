@@ -29,7 +29,7 @@ import android.util.LongSparseArray;
 import com.readystatesoftware.chuck.Chuck;
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
-import com.readystatesoftware.chuck.internal.ui.BaseChuckActivity;
+import com.readystatesoftware.chuck.internal.ui.BaseActivity;
 
 import java.lang.reflect.Method;
 
@@ -65,22 +65,22 @@ public class NotificationHelper {
         this.context = context;
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.createNotificationChannel(
-                    new NotificationChannel(CHANNEL_ID,
-                            context.getString(R.string.notification_category), NotificationManager.IMPORTANCE_LOW));
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                    context.getString(R.string.notification_category), NotificationManager.IMPORTANCE_LOW);
+            notificationManager.createNotificationChannel(channel);
             try {
                 setChannelId = NotificationCompat.Builder.class.getMethod("setChannelId", String.class);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) { }
         }
     }
 
     public synchronized void show(HttpTransaction transaction) {
         addToBuffer(transaction);
-        if (!BaseChuckActivity.isInForeground()) {
+        if (!BaseActivity.isInForeground()) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                     .setContentIntent(PendingIntent.getActivity(context, 0, Chuck.getLaunchIntent(context), 0))
                     .setLocalOnly(true)
-                    .setSmallIcon(R.drawable.chuck_ic_notification_white_36dp)
+                    .setSmallIcon(R.drawable.chuck_ic_notification_white_24dp)
                     .setColor(ContextCompat.getColor(context, R.color.chuck_colorPrimary))
                     .setContentTitle(context.getString(R.string.chuck_notification_title));
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();

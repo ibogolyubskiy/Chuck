@@ -21,7 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 
-public abstract class BaseChuckActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     private static boolean inForeground;
 

@@ -23,13 +23,13 @@ import android.support.v7.widget.Toolbar;
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 
-public class MainActivity extends BaseChuckActivity implements TransactionListFragment.OnListFragmentInteractionListener {
+public class ChuckActivity extends BaseActivity implements TransactionListFragment.OnItemSelectionListener {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chuck_activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setSubtitle(getApplicationName());
         if (savedInstanceState == null) {
@@ -40,7 +40,7 @@ public class MainActivity extends BaseChuckActivity implements TransactionListFr
     }
 
     @Override
-    public void onListFragmentInteraction(HttpTransaction transaction) {
+    public void onSelectItem(HttpTransaction transaction) {
         TransactionActivity.start(this, transaction.getId());
     }
 
