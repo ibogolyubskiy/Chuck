@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readystatesoftware.chuck.internal.ui;
+package com.readystatesoftware.chuck.internal.ui.fragments;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,8 +28,9 @@ import android.widget.TextView;
 
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
+import com.readystatesoftware.chuck.internal.ui.viewmodels.TransactionViewModel;
 
-public class TransactionOverviewFragment extends Fragment implements TransactionFragment {
+public class TransactionOverviewFragment extends Fragment {
 
     private TextView url;
     private TextView method;
@@ -42,12 +45,19 @@ public class TransactionOverviewFragment extends Fragment implements Transaction
     private TextView responseSize;
     private TextView totalSize;
 
-    private HttpTransaction transaction;
+    private TransactionViewModel model;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        model = ViewModelProviders.of(requireActivity()).get(TransactionViewModel.class);
+        model.transaction.observe(this, new Observer<HttpTransaction>() {
+            @Override
+            public void onChanged(@Nullable HttpTransaction transaction) {
+                populateUI();
+            }
+        });
     }
 
     @Override
@@ -74,18 +84,8 @@ public class TransactionOverviewFragment extends Fragment implements Transaction
         populateUI();
     }
 
-    @Override
-    public String getTitle() {
-        return getString(R.string.chuck_overview);
-    }
-
-    @Override
-    public void transactionUpdated(HttpTransaction transaction) {
-        this.transaction = transaction;
-        populateUI();
-    }
-
     private void populateUI() {
+        HttpTransaction transaction = model.transaction.getValue();
         if (isAdded() && transaction != null) {
             url.setText(transaction.getUrl());
             method.setText(transaction.getMethod());

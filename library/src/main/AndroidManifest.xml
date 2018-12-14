@@ -22,7 +22,7 @@
             android:authorities="${applicationId}.chuck.provider"
             android:exported="false" />
         <activity
-            android:name=".internal.ui.ChuckActivity"
+            android:name=".internal.ui.activities.ChuckActivity"
             android:label="@string/chuck_name"
             android:icon="@mipmap/ic_chuck"
             android:launchMode="singleTask"
@@ -33,9 +33,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".internal.ui.TransactionActivity"
+        <activity android:name=".internal.ui.activities.TransactionActivity"
             android:theme="@style/Chuck.Theme"
-            android:parentActivityName=".internal.ui.ChuckActivity"/>
+            android:parentActivityName=".internal.ui.activities.ChuckActivity"/>
         <service
             android:name=".internal.support.ClearTransactionsService"
             android:exported="false" />

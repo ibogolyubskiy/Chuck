@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readystatesoftware.chuck.internal.ui;
+package com.readystatesoftware.chuck.internal.ui.activities;
 
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
+import com.readystatesoftware.chuck.internal.ui.fragments.TransactionListFragment;
 
 public class ChuckActivity extends BaseActivity implements TransactionListFragment.OnItemSelectionListener {
 

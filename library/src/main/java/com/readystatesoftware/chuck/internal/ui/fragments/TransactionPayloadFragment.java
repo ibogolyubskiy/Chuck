@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readystatesoftware.chuck.internal.ui;
+package com.readystatesoftware.chuck.internal.ui.fragments;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,11 +30,12 @@ import android.widget.TextView;
 
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
+import com.readystatesoftware.chuck.internal.ui.viewmodels.TransactionViewModel;
 
-public class TransactionPayloadFragment extends Fragment implements TransactionFragment {
+import static com.readystatesoftware.chuck.internal.ui.activities.TransactionActivity.TYPE_REQUEST;
+import static com.readystatesoftware.chuck.internal.ui.activities.TransactionActivity.TYPE_RESPONSE;
 
-    public static final int TYPE_REQUEST = 0;
-    public static final int TYPE_RESPONSE = 1;
+public class TransactionPayloadFragment extends Fragment {
 
     private static final String ARG_TYPE = "type";
 
@@ -40,7 +43,7 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
     private TextView body;
 
     private int type;
-    private HttpTransaction transaction;
+    private TransactionViewModel model;
 
     public static TransactionPayloadFragment newInstance(int type) {
         TransactionPayloadFragment fragment = new TransactionPayloadFragment();
@@ -53,9 +56,17 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         if (getArguments() != null)
             type = getArguments().getInt(ARG_TYPE);
-        setRetainInstance(true);
+
+        model = ViewModelProviders.of(requireActivity()).get(TransactionViewModel.class);
+        model.transaction.observe(this, new Observer<HttpTransaction>() {
+            @Override
+            public void onChanged(@Nullable HttpTransaction transaction) {
+                populateUI();
+            }
+        });
     }
 
     @Override
@@ -72,22 +83,8 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
         populateUI();
     }
 
-    @Override
-    public String getTitle() {
-        switch (type) {
-            case TYPE_REQUEST: return getString(R.string.chuck_request);
-            case TYPE_RESPONSE: return getString(R.string.chuck_response);
-            default: return null;
-        }
-    }
-
-    @Override
-    public void transactionUpdated(HttpTransaction transaction) {
-        this.transaction = transaction;
-        populateUI();
-    }
-
     private void populateUI() {
+        HttpTransaction transaction = model.transaction.getValue();
         if (isAdded() && transaction != null) {
             switch (type) {
                 case TYPE_REQUEST:

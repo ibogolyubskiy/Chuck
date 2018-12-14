@@ -13,46 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readystatesoftware.chuck.internal.ui;
+package com.readystatesoftware.chuck.internal.ui.activities;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.readystatesoftware.chuck.R;
-import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.data.LocalCupboard;
 import com.readystatesoftware.chuck.internal.support.FormatUtils;
 import com.readystatesoftware.chuck.internal.support.SimpleOnPageChangedListener;
+import com.readystatesoftware.chuck.internal.ui.adapters.FragmentsAdapter;
+import com.readystatesoftware.chuck.internal.ui.viewmodels.TransactionViewModel;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.readystatesoftware.chuck.internal.ui.TransactionPayloadFragment.TYPE_REQUEST;
-import static com.readystatesoftware.chuck.internal.ui.TransactionPayloadFragment.TYPE_RESPONSE;
+import static com.readystatesoftware.chuck.internal.data.ChuckContentProvider.TRANSACTION_URI;
 
 public class TransactionActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String ARG_TRANSACTION_ID = "transaction_id";
+
+    public static final int TYPE_OVERVIEW = 0;
+    public static final int TYPE_REQUEST = 1;
+    public static final int TYPE_RESPONSE = 2;
 
     private static int selectedTabPosition = 0;
 
@@ -63,15 +62,24 @@ public class TransactionActivity extends BaseActivity implements LoaderManager.L
     }
 
     private TextView title;
-    private Adapter adapter;
 
     private long transactionId;
-    private HttpTransaction transaction;
+
+    private TransactionViewModel model;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chuck_activity_transaction);
+
+        model = ViewModelProviders.of(this).get(TransactionViewModel.class);
+        model.transaction.observe(this, new Observer<HttpTransaction>() {
+
+            @Override
+            public void onChanged(@Nullable HttpTransaction transaction) {
+                populateUI();
+            }
+        });
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -98,19 +106,23 @@ public class TransactionActivity extends BaseActivity implements LoaderManager.L
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.chuck_transaction, menu);
+        getMenuInflater().inflate(R.menu.chuck_transaction, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.share_text) {
-            share(FormatUtils.getShareText(this, transaction));
-            return true;
-        } else if (item.getItemId() == R.id.share_curl) {
-            share(FormatUtils.getShareCurlCommand(transaction));
-            return true;
+        HttpTransaction transaction = model.transaction.getValue();
+        if (transaction != null) {
+            if (item.getItemId() == R.id.share_text) {
+                share(FormatUtils.getShareText(this, transaction));
+                return true;
+            } else if (item.getItemId() == R.id.share_curl) {
+                share(FormatUtils.getShareCurlCommand(transaction));
+                return true;
+            } else {
+                return super.onOptionsItemSelected(item);
+            }
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -119,36 +131,32 @@ public class TransactionActivity extends BaseActivity implements LoaderManager.L
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        CursorLoader loader = new CursorLoader(this);
-        loader.setUri(ContentUris.withAppendedId(ChuckContentProvider.TRANSACTION_URI, transactionId));
-        return loader;
+        return new CursorLoader(
+            this,
+            ContentUris.withAppendedId(TRANSACTION_URI, transactionId),
+            null,
+            null,
+            null,
+            null);
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        transaction = LocalCupboard.getInstance().withCursor(data).get(HttpTransaction.class);
-        populateUI();
+        model.transaction.setValue(LocalCupboard.getInstance().withCursor(data).get(HttpTransaction.class));
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) { }
 
     private void populateUI() {
+        HttpTransaction transaction = model.transaction.getValue();
         if (transaction != null) {
             title.setText(String.format("%s %s", transaction.getMethod(), transaction.getPath()));
-            for (TransactionFragment fragment : adapter.fragments) {
-                fragment.transactionUpdated(transaction);
-            }
         }
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(new TransactionOverviewFragment(), getString(R.string.chuck_overview));
-        adapter.addFragment(TransactionPayloadFragment.newInstance(TYPE_REQUEST), getString(R.string.chuck_request));
-        adapter.addFragment(TransactionPayloadFragment.newInstance(TYPE_RESPONSE), getString(R.string.chuck_response));
-        viewPager.setAdapter(adapter);
-        viewPager.setOffscreenPageLimit(adapter.getCount() - 1);
+        viewPager.setAdapter(new FragmentsAdapter(this, getSupportFragmentManager()));
         viewPager.addOnPageChangeListener(new SimpleOnPageChangedListener() {
             @Override
             public void onPageSelected(int position) {
@@ -164,34 +172,5 @@ public class TransactionActivity extends BaseActivity implements LoaderManager.L
         sendIntent.putExtra(Intent.EXTRA_TEXT, content);
         sendIntent.setType("text/plain");
         startActivity(Intent.createChooser(sendIntent, null));
-    }
-
-    static class Adapter extends FragmentPagerAdapter {
-        final List<TransactionFragment> fragments = new ArrayList<>();
-        private final List<String> fragmentTitles = new ArrayList<>();
-
-        Adapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        void addFragment(TransactionFragment fragment, String title) {
-            fragments.add(fragment);
-            fragmentTitles.add(title);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return (Fragment) fragments.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return fragments.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return fragmentTitles.get(position);
-        }
     }
 }

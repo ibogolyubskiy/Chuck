@@ -1,4 +1,4 @@
-package com.readystatesoftware.chuck.internal.ui;
+package com.readystatesoftware.chuck.internal.ui.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -14,7 +14,7 @@ import com.androidessence.recyclerviewcursoradapter.RecyclerViewCursorViewHolder
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.data.LocalCupboard;
-import com.readystatesoftware.chuck.internal.ui.TransactionListFragment.OnItemSelectionListener;
+import com.readystatesoftware.chuck.internal.ui.fragments.TransactionListFragment.OnItemSelectionListener;
 
 public class TransactionAdapter extends RecyclerViewCursorAdapter<TransactionAdapter.ViewHolder> {
 
@@ -27,7 +27,7 @@ public class TransactionAdapter extends RecyclerViewCursorAdapter<TransactionAda
     private int mColor400;
     private int mColor300;
 
-    TransactionAdapter(Context context, OnItemSelectionListener listener) {
+    public TransactionAdapter(Context context, OnItemSelectionListener listener) {
         super(context);
         mListener = listener;
         mColorDefault = ContextCompat.getColor(context, R.color.chuck_status_default);

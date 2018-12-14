@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readystatesoftware.chuck.internal.ui;
+package com.readystatesoftware.chuck.internal.ui.fragments;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -40,6 +40,7 @@ import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 import com.readystatesoftware.chuck.internal.support.SQLiteUtils;
+import com.readystatesoftware.chuck.internal.ui.adapters.TransactionAdapter;
 
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 

@@ -12,10 +12,15 @@ android {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
-    implementation 'nl.qbusict:cupboard:2.2.0'
-    implementation 'com.androidessence:recyclerviewcursoradapter:1.0.0'
     implementation "com.android.support:design:$supportVersion"
+
+    api "android.arch.lifecycle:extensions:$architectureVersion"
+    annotationProcessor "android.arch.lifecycle:compiler:$architectureVersion"
+
+    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    implementation "nl.qbusict:cupboard:2.2.0"
+    implementation "com.androidessence:recyclerviewcursoradapter:1.0.0"
+
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

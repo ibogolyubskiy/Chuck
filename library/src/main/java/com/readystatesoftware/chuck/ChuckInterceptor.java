@@ -135,7 +135,6 @@ public final class ChuckInterceptor implements Interceptor {
         Request request = chain.request();
 
         RequestBody requestBody = request.body();
-        boolean hasRequestBody = requestBody != null;
 
         HttpTransaction transaction = new HttpTransaction();
         transaction.setRequestDate(new Date());
@@ -144,9 +143,10 @@ public final class ChuckInterceptor implements Interceptor {
         transaction.setUrl(request.url().toString());
 
         transaction.setRequestHeaders(request.headers());
-        if (hasRequestBody) {
-            if (requestBody.contentType() != null) {
-                transaction.setRequestContentType(requestBody.contentType().toString());
+        if (requestBody != null) {
+            MediaType mediaType = requestBody.contentType();
+            if (mediaType != null) {
+                transaction.setRequestContentType(mediaType.toString());
             }
             if (requestBody.contentLength() != -1) {
                 transaction.setRequestContentLength(requestBody.contentLength());
@@ -154,7 +154,7 @@ public final class ChuckInterceptor implements Interceptor {
         }
 
         transaction.setRequestBodyIsPlainText(bodyHasSupportedEncoding(request.headers()));
-        if (hasRequestBody && transaction.requestBodyIsPlainText()) {
+        if (requestBody != null && transaction.requestBodyIsPlainText()) {
             BufferedSource source = getNativeSource(new Buffer(), bodyGzipped(request.headers()));
             Buffer buffer = source.buffer();
             requestBody.writeTo(buffer);
@@ -184,6 +184,7 @@ public final class ChuckInterceptor implements Interceptor {
         long tookMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
 
         ResponseBody responseBody = response.body();
+        boolean responseBodyPresent = responseBody != null;
 
         transaction.setRequestHeaders(response.request().headers()); // includes headers added later in the chain
         transaction.setResponseDate(new Date());
@@ -192,25 +193,29 @@ public final class ChuckInterceptor implements Interceptor {
         transaction.setResponseCode(response.code());
         transaction.setResponseMessage(response.message());
 
-        transaction.setResponseContentLength(responseBody.contentLength());
-        if (responseBody.contentType() != null) {
-            transaction.setResponseContentType(responseBody.contentType().toString());
+        if (responseBodyPresent) {
+            transaction.setResponseContentLength(responseBody.contentLength());
+            MediaType mediaType = responseBody.contentType();
+            if (mediaType != null) {
+                transaction.setResponseContentType(mediaType.toString());
+            }
         }
         transaction.setResponseHeaders(response.headers());
-
         transaction.setResponseBodyIsPlainText(bodyHasSupportedEncoding(response.headers()));
         if (HttpHeaders.hasBody(response) && transaction.responseBodyIsPlainText()) {
             BufferedSource source = getNativeSource(response);
             source.request(Long.MAX_VALUE);
             Buffer buffer = source.buffer();
             Charset charset = UTF8;
-            MediaType contentType = responseBody.contentType();
-            if (contentType != null) {
-                try {
-                    charset = contentType.charset(UTF8);
-                } catch (UnsupportedCharsetException e) {
-                    update(transaction, transactionUri);
-                    return response;
+            if (responseBodyPresent) {
+                MediaType contentType = responseBody.contentType();
+                if (contentType != null) {
+                    try {
+                        charset = contentType.charset(UTF8);
+                    } catch (UnsupportedCharsetException e) {
+                        update(transaction, transactionUri);
+                        return response;
+                    }
                 }
             }
             if (isPlaintext(buffer)) {
@@ -220,9 +225,7 @@ public final class ChuckInterceptor implements Interceptor {
             }
             transaction.setResponseContentLength(buffer.size());
         }
-
         update(transaction, transactionUri);
-
         return response;
     }
 

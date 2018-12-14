@@ -18,7 +18,7 @@ package com.readystatesoftware.chuck;
 import android.content.Context;
 import android.content.Intent;
 
-import com.readystatesoftware.chuck.internal.ui.ChuckActivity;
+import com.readystatesoftware.chuck.internal.ui.activities.ChuckActivity;
 
 /**
  * Chuck utilities.

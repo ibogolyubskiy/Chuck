@@ -29,7 +29,7 @@ import android.util.LongSparseArray;
 import com.readystatesoftware.chuck.Chuck;
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
-import com.readystatesoftware.chuck.internal.ui.BaseActivity;
+import com.readystatesoftware.chuck.internal.ui.activities.BaseActivity;
 
 import java.lang.reflect.Method;
 
