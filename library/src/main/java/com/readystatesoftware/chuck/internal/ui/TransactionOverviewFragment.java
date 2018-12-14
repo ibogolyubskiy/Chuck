@@ -29,23 +29,20 @@ import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 
 public class TransactionOverviewFragment extends Fragment implements TransactionFragment {
 
-    TextView url;
-    TextView method;
-    TextView protocol;
-    TextView status;
-    TextView response;
-    TextView ssl;
-    TextView requestTime;
-    TextView responseTime;
-    TextView duration;
-    TextView requestSize;
-    TextView responseSize;
-    TextView totalSize;
+    private TextView url;
+    private TextView method;
+    private TextView protocol;
+    private TextView status;
+    private TextView response;
+    private TextView ssl;
+    private TextView requestTime;
+    private TextView responseTime;
+    private TextView duration;
+    private TextView requestSize;
+    private TextView responseSize;
+    private TextView totalSize;
 
     private HttpTransaction transaction;
-
-    public TransactionOverviewFragment() {
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,6 +72,11 @@ public class TransactionOverviewFragment extends Fragment implements Transaction
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         populateUI();
+    }
+
+    @Override
+    public String getTitle() {
+        return getString(R.string.chuck_overview);
     }
 
     @Override

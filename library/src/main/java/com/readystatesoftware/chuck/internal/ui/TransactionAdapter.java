@@ -1,158 +1,69 @@
-/*
- * Copyright (C) 2017 Jeff Gilfelt.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.readystatesoftware.chuck.internal.ui;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.CursorAdapter;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.androidessence.recyclerviewcursoradapter.RecyclerViewCursorAdapter;
+import com.androidessence.recyclerviewcursoradapter.RecyclerViewCursorViewHolder;
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.HttpTransaction;
 import com.readystatesoftware.chuck.internal.data.LocalCupboard;
 import com.readystatesoftware.chuck.internal.ui.TransactionListFragment.OnItemSelectionListener;
 
-class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
+public class TransactionAdapter extends RecyclerViewCursorAdapter<TransactionAdapter.ViewHolder> {
 
-    private final Context context;
-    private final TransactionListFragment.OnItemSelectionListener listener;
-    private final CursorAdapter cursorAdapter;
+    private OnItemSelectionListener mListener;
 
-    private final int colorDefault;
-    private final int colorRequested;
-    private final int colorError;
-    private final int color500;
-    private final int color400;
-    private final int color300;
+    private int mColorDefault;
+    private int mColorRequested;
+    private int mColorError;
+    private int mColor500;
+    private int mColor400;
+    private int mColor300;
 
     TransactionAdapter(Context context, OnItemSelectionListener listener) {
-        this.listener = listener;
-        this.context = context;
-        colorDefault = ContextCompat.getColor(context, R.color.chuck_status_default);
-        colorRequested = ContextCompat.getColor(context, R.color.chuck_status_requested);
-        colorError = ContextCompat.getColor(context, R.color.chuck_status_error);
-        color500 = ContextCompat.getColor(context, R.color.chuck_status_500);
-        color400 = ContextCompat.getColor(context, R.color.chuck_status_400);
-        color300 = ContextCompat.getColor(context, R.color.chuck_status_300);
-
-        cursorAdapter = new CursorAdapter(TransactionAdapter.this.context, null, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER) {
-            @Override
-            public View newView(Context context, Cursor cursor, ViewGroup parent) {
-                View itemView = View.inflate(context, R.layout.chuck_list_item_transaction, null);
-                ViewHolder holder = new ViewHolder(itemView);
-                itemView.setTag(holder);
-                return itemView;
-            }
-
-            @Override
-            public void bindView(View view, final Context context, Cursor cursor) {
-                final HttpTransaction transaction = LocalCupboard.getInstance().withCursor(cursor).get(HttpTransaction.class);
-                final ViewHolder holder = (ViewHolder) view.getTag();
-                holder.path.setText(String.format("%s %s", transaction.getMethod(), transaction.getPath()));
-                holder.host.setText(transaction.getHost());
-                holder.start.setText(transaction.getRequestStartTimeString());
-                holder.ssl.setVisibility(transaction.isSsl() ? View.VISIBLE : View.GONE);
-                if (transaction.getStatus() == HttpTransaction.Status.Complete) {
-                    holder.code.setText(String.valueOf(transaction.getResponseCode()));
-                    holder.duration.setText(transaction.getDurationString());
-                    holder.size.setText(transaction.getTotalSizeString());
-                } else {
-                    holder.code.setText(null);
-                    holder.duration.setText(null);
-                    holder.size.setText(null);
-                }
-                if (transaction.getStatus() == HttpTransaction.Status.Failed) {
-                    holder.code.setText("!!!");
-                }
-                setStatusColor(holder, transaction);
-                holder.transaction = transaction;
-                holder.view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (null != TransactionAdapter.this.listener) {
-                            TransactionAdapter.this.listener.onSelectItem(holder.transaction);
-                        }
-                    }
-                });
-            }
-
-            private void setStatusColor(ViewHolder holder, HttpTransaction transaction) {
-                int color;
-                if (transaction.getStatus() == HttpTransaction.Status.Failed) {
-                    color = colorError;
-                } else if (transaction.getStatus() == HttpTransaction.Status.Requested) {
-                    color = colorRequested;
-                } else if (transaction.getResponseCode() >= 500) {
-                    color = color500;
-                } else if (transaction.getResponseCode() >= 400) {
-                    color = color400;
-                } else if (transaction.getResponseCode() >= 300) {
-                    color = color300;
-                } else {
-                    color = colorDefault;
-                }
-                holder.code.setTextColor(color);
-                holder.path.setTextColor(color);
-            }
-        };
+        super(context);
+        mListener = listener;
+        mColorDefault = ContextCompat.getColor(context, R.color.chuck_status_default);
+        mColorRequested = ContextCompat.getColor(context, R.color.chuck_status_requested);
+        mColorError = ContextCompat.getColor(context, R.color.chuck_status_error);
+        mColor500 = ContextCompat.getColor(context, R.color.chuck_status_500);
+        mColor400 = ContextCompat.getColor(context, R.color.chuck_status_400);
+        mColor300 = ContextCompat.getColor(context, R.color.chuck_status_300);
+        setupCursorAdapter(null, 0, R.layout.chuck_list_item_transaction, false);
     }
 
+    @NonNull
     @Override
-    public int getItemCount() {
-        return cursorAdapter.getCount();
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolder(mCursorAdapter.newView(mContext, mCursorAdapter.getCursor(), parent));
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        cursorAdapter.getCursor().moveToPosition(position);
-        cursorAdapter.bindView(holder.itemView, context, cursorAdapter.getCursor());
+        mCursorAdapter.getCursor().moveToPosition(position);
+        setViewHolder(holder);
+        mCursorAdapter.bindView(null, mContext, mCursorAdapter.getCursor());
     }
 
-    @Override
-    @NonNull
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = cursorAdapter.newView(context, cursorAdapter.getCursor(), parent);
-        return new ViewHolder(v);
-    }
-
-    void swapCursor(Cursor newCursor) {
-        cursorAdapter.swapCursor(newCursor);
-        notifyDataSetChanged();
-    }
-
-    class ViewHolder extends RecyclerView.ViewHolder {
-        public final View view;
-        public final TextView code;
-        public final TextView path;
-        public final TextView host;
-        public final TextView start;
-        public final TextView duration;
-        public final TextView size;
-        public final ImageView ssl;
-        HttpTransaction transaction;
+    class ViewHolder extends RecyclerViewCursorViewHolder {
+        private TextView code;
+        private TextView path;
+        private TextView host;
+        private TextView start;
+        private TextView duration;
+        private TextView size;
+        private ImageView ssl;
+        private HttpTransaction transaction;
 
         ViewHolder(View view) {
             super(view);
-            this.view = view;
             code = view.findViewById(R.id.code);
             path = view.findViewById(R.id.path);
             host = view.findViewById(R.id.host);
@@ -160,6 +71,55 @@ class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHol
             duration = view.findViewById(R.id.duration);
             size = view.findViewById(R.id.size);
             ssl = view.findViewById(R.id.ssl);
+            itemView.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) mListener.onSelectItem(transaction);
+                }
+            });
+        }
+
+        @Override
+        public void bindCursor(Cursor cursor) {
+            transaction = LocalCupboard.getInstance().withCursor(cursor).get(HttpTransaction.class);
+            path.setText(String.format("%s %s", transaction.getMethod(), transaction.getPath()));
+            host.setText(transaction.getHost());
+            start.setText(transaction.getRequestStartTimeString());
+            ssl.setVisibility(transaction.isSsl() ? View.VISIBLE : View.GONE);
+            if (transaction.getStatus() == HttpTransaction.Status.Complete) {
+                code.setText(String.valueOf(transaction.getResponseCode()));
+                duration.setText(transaction.getDurationString());
+                size.setText(transaction.getTotalSizeString());
+            } else {
+                code.setText(null);
+                duration.setText(null);
+                size.setText(null);
+            }
+            if (transaction.getStatus() == HttpTransaction.Status.Failed) {
+                code.setText("!!!");
+            }
+            setStatusColor(transaction);
+
+        }
+
+        private void setStatusColor(HttpTransaction transaction) {
+            int color;
+            if (transaction.getStatus() == HttpTransaction.Status.Failed) {
+                color = mColorError;
+            } else if (transaction.getStatus() == HttpTransaction.Status.Requested) {
+                color = mColorRequested;
+            } else if (transaction.getResponseCode() >= 500) {
+                color = mColor500;
+            } else if (transaction.getResponseCode() >= 400) {
+                color = mColor400;
+            } else if (transaction.getResponseCode() >= 300) {
+                color = mColor300;
+            } else {
+                color = mColorDefault;
+            }
+            code.setTextColor(color);
+            path.setTextColor(color);
         }
     }
 }

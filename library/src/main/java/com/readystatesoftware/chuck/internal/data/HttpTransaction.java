@@ -19,7 +19,7 @@ import android.net.Uri;
 
 import com.google.gson.reflect.TypeToken;
 import com.readystatesoftware.chuck.internal.support.FormatUtils;
-import com.readystatesoftware.chuck.internal.support.JsonConvertor;
+import com.readystatesoftware.chuck.internal.support.JsonConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -255,11 +255,11 @@ public class HttpTransaction {
     }
 
     public void setRequestHeaders(List<HttpHeader> headers) {
-        requestHeaders = JsonConvertor.getInstance().toJson(headers);
+        requestHeaders = JsonConverter.getInstance().toJson(headers);
     }
 
     public List<HttpHeader> getRequestHeaders() {
-        return JsonConvertor.getInstance().fromJson(requestHeaders,
+        return JsonConverter.getInstance().fromJson(requestHeaders,
                 new TypeToken<List<HttpHeader>>(){}.getType());
     }
 
@@ -272,11 +272,11 @@ public class HttpTransaction {
     }
 
     public void setResponseHeaders(List<HttpHeader> headers) {
-        responseHeaders = JsonConvertor.getInstance().toJson(headers);
+        responseHeaders = JsonConverter.getInstance().toJson(headers);
     }
 
     public List<HttpHeader> getResponseHeaders() {
-        return JsonConvertor.getInstance().fromJson(responseHeaders,
+        return JsonConverter.getInstance().fromJson(responseHeaders,
                 new TypeToken<List<HttpHeader>>(){}.getType());
     }
 

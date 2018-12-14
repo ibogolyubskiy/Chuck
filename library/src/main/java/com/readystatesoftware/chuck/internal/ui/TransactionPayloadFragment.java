@@ -36,14 +36,11 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
 
     private static final String ARG_TYPE = "type";
 
-    TextView headers;
-    TextView body;
+    private TextView headers;
+    private TextView body;
 
     private int type;
     private HttpTransaction transaction;
-
-    public TransactionPayloadFragment() {
-    }
 
     public static TransactionPayloadFragment newInstance(int type) {
         TransactionPayloadFragment fragment = new TransactionPayloadFragment();
@@ -56,7 +53,8 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        type = getArguments().getInt(ARG_TYPE);
+        if (getArguments() != null)
+            type = getArguments().getInt(ARG_TYPE);
         setRetainInstance(true);
     }
 
@@ -69,9 +67,18 @@ public class TransactionPayloadFragment extends Fragment implements TransactionF
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         populateUI();
+    }
+
+    @Override
+    public String getTitle() {
+        switch (type) {
+            case TYPE_REQUEST: return getString(R.string.chuck_request);
+            case TYPE_RESPONSE: return getString(R.string.chuck_response);
+            default: return null;
+        }
     }
 
     @Override

@@ -22,12 +22,11 @@ import com.google.gson.internal.bind.DateTypeAdapter;
 
 import java.util.Date;
 
-public class JsonConvertor {
+public class JsonConverter {
 
     private static Gson gson = null;
 
-    private JsonConvertor() {
-    }
+    private JsonConverter() { }
 
     public static Gson getInstance() {
         if (gson == null) {

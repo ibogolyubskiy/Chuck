@@ -25,7 +25,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
@@ -50,6 +49,7 @@ public class TransactionListFragment extends Fragment implements
     private String currentFilter;
     private OnItemSelectionListener listener;
     private TransactionAdapter adapter;
+    private Context context;
 
     public TransactionListFragment() {}
 
@@ -65,17 +65,18 @@ public class TransactionListFragment extends Fragment implements
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.chuck_fragment_transaction_list, container, false);
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
-            recyclerView.addItemDecoration(decoration);
-            adapter = new TransactionAdapter(getContext(), listener);
-            recyclerView.setAdapter(adapter);
-        }
-        return view;
+        return inflater.inflate(R.layout.chuck_fragment_transaction_list, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        context = view.getContext();
+        RecyclerView recyclerView = view.findViewById(R.id.list);
+        DividerItemDecoration decoration = new DividerItemDecoration(context, VERTICAL);
+        recyclerView.addItemDecoration(decoration);
+        adapter = new TransactionAdapter(context, listener);
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -114,7 +115,7 @@ public class TransactionListFragment extends Fragment implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.clear) {
-            getContext().getContentResolver().delete(ChuckContentProvider.TRANSACTION_URI, null, null);
+            context.getContentResolver().delete(ChuckContentProvider.TRANSACTION_URI, null, null);
             NotificationHelper.clearBuffer();
             return true;
         } else if (item.getItemId() == R.id.browse_sql) {
@@ -128,7 +129,7 @@ public class TransactionListFragment extends Fragment implements
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        CursorLoader loader = new CursorLoader(getContext());
+        CursorLoader loader = new CursorLoader(context);
         loader.setUri(ChuckContentProvider.TRANSACTION_URI);
         if (!TextUtils.isEmpty(currentFilter)) {
             if (TextUtils.isDigitsOnly(currentFilter)) {

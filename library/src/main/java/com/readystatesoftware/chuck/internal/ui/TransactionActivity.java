@@ -62,8 +62,8 @@ public class TransactionActivity extends BaseActivity implements LoaderManager.L
         context.startActivity(intent);
     }
 
-    TextView title;
-    Adapter adapter;
+    private TextView title;
+    private Adapter adapter;
 
     private long transactionId;
     private HttpTransaction transaction;
@@ -77,8 +77,8 @@ public class TransactionActivity extends BaseActivity implements LoaderManager.L
         setSupportActionBar(toolbar);
         title = findViewById(R.id.toolbar_title);
 
-        final ActionBar ab = getSupportActionBar();
-        if (ab != null) ab.setDisplayHomeAsUpEnabled(true);
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.setDisplayHomeAsUpEnabled(true);
 
         ViewPager viewPager = findViewById(R.id.viewpager);
         if (viewPager != null) setupViewPager(viewPager);
@@ -148,6 +148,7 @@ public class TransactionActivity extends BaseActivity implements LoaderManager.L
         adapter.addFragment(TransactionPayloadFragment.newInstance(TYPE_REQUEST), getString(R.string.chuck_request));
         adapter.addFragment(TransactionPayloadFragment.newInstance(TYPE_RESPONSE), getString(R.string.chuck_response));
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(adapter.getCount() - 1);
         viewPager.addOnPageChangeListener(new SimpleOnPageChangedListener() {
             @Override
             public void onPageSelected(int position) {

@@ -39,6 +39,5 @@ public class LocalCupboard {
                 .build();
     }
 
-    private LocalCupboard() {
-    }
+    private LocalCupboard() { }
 }
