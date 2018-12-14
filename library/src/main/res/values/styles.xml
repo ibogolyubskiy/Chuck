@@ -40,4 +40,16 @@
         <item name="android:textSize" tools:ignore="SpUsage">16dp</item>
         <item name="android:maxLines">2</item>
     </style>
+
+    <style name="Chuck.TextAppearance.TransactionListTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:gravity">top</item>
+        <item name="android:textSize" tools:ignore="SpUsage">16dp</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="Chuck.TextAppearance.TransactionListSubTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:gravity">top</item>
+        <item name="android:textSize" tools:ignore="SpUsage">12dp</item>
+        <item name="android:maxLines">1</item>
+    </style>
 </resources>

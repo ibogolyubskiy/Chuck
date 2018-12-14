@@ -35,7 +35,8 @@
             app:title="@string/chuck_name"
             app:subtitle="@string/chuck_name"
             app:contentInsetStartWithNavigation="0dp"
-            app:subtitleTextAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle"
+            app:titleTextAppearance="@style/Chuck.TextAppearance.TransactionTitle"
+            app:subtitleTextAppearance="@style/Chuck.TextAppearance.TransactionListSubTitle"
             app:navigationIcon="@drawable/chuck_ic_notification_white_24dp"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
