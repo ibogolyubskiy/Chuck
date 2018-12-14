@@ -271,7 +271,7 @@ public final class ChuckInterceptor implements Interceptor {
 
     private boolean bodyHasSupportedEncoding(Headers headers) {
         String contentEncoding = headers.get("Content-Encoding");
-        return "identity".equalsIgnoreCase(contentEncoding) || "gzip".equalsIgnoreCase(contentEncoding);
+        return contentEncoding == null || "identity".equalsIgnoreCase(contentEncoding) || "gzip".equalsIgnoreCase(contentEncoding);
     }
 
     private boolean bodyGzipped(Headers headers) {
